@@ -33,15 +33,13 @@ class HighlightExcerpt {
    *    The string to highlight.
    * @param string[] $tokens
    *    The words/phrases to be highlighted.
-   * @param string $method
-   *    Either "word" or "lemma".
    * @param int $length
    *    The approximate target length of the entire excerpt.
    *
    * @return string
    *    The highlighted text.
    */
-  public static function highlight($text, array $tokens, $method = 'word', $length = '300') {
+  public static function highlight($text, array $tokens, $length = '300') {
     $excerpt_list = [];
     $matches = [];
     $excerpt = "";
