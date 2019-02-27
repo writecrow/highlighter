@@ -38,7 +38,7 @@ echo '
     <span><h3>PHP Highlighter</h3><span class="u-pull-right">Source code: <a  href="https://github.com/writecrow/highlighter">https://github.com/writecrow/highlighter</a></span><hr />
   </div>
   <div class="six twelve columns">
-    <h3>Text to be highlighted:</h3>' . $text . '<hr />
+    <h4>Text to be highlighted:</h4>' . $text . '<hr />
   </div>
   </div>
   <form action="//' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] . '" method="POST">
@@ -49,7 +49,7 @@ echo '
         <input name="token2" value=\'' . $tokens[1] . '\'>
         <input name="token3" value=\'' . $tokens[2] . '\'>
         <input type="submit" value="Highlight" />';
-echo '<div>';
+echo '<div><h4>Highlighted Excerpts</h4>';
 echo HighlightExcerpt::highlight($text, $tokens, $method = 'word', $length = 350);
 echo '</div>';
 echo '

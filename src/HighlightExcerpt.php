@@ -2,6 +2,8 @@
 
 namespace writecrow\Highlighter;
 
+use writecrow\Lemmatizer\Lemmatizer;
+
 /**
  * Class HighlightExcerpt.
  *
@@ -56,6 +58,28 @@ class HighlightExcerpt {
     }
     $ideal_length = self::getIdealLength($length, count($tokens));
     // @todo: if lemma search, retrieve lemmas.
+    if (TRUE) {
+      $lemma_tokens = [];
+      foreach ($tokens as $token) {
+        $quoted = FALSE;
+        $first = substr($token, 0, 1);
+        $last = substr($token, -1);
+        if ($first == '"' && $last == '"') {
+          $token = trim($token, '"');
+          $quoted = TRUE;
+        }
+        if ($quoted) {
+          $lemma_tokens[] = $token;
+          continue;
+        }
+        $lemma = Lemmatizer::getLemma($token);
+        $variants = explode(',', Lemmatizer::getWordsFromLemma($lemma));
+        foreach ($variants as $variant) {
+          $lemma_tokens[] = $variant;
+        }
+      }
+      $tokens = $lemma_tokens;
+    }
     foreach ($tokens as $token) {
       if (empty($token)) {
         continue;
@@ -80,8 +104,7 @@ class HighlightExcerpt {
         }
         // Try to trim the excerpt to a word boundary.
         $word_boundary = substr($excerpt, strpos($excerpt, ' '), strrpos($excerpt, ' '));
-        $word_boundary = substr($excerpt, strpos($excerpt, ' '), strrpos($excerpt, ' '));
-        $excerpt_list[] = "..." . $excerpt . "...";
+        $excerpt_list[] = "..." . $word_boundary . "...";
       }
     }
     return implode('<br />', $excerpt_list);
