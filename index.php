@@ -21,7 +21,7 @@ if (isset($_POST['token3'])) {
   $tokens[] = $_POST['token3'];
 }
 if (empty($tokens)) {
-  $tokens = ['he', 'Cold', '. Elizabeth'];
+  $tokens = ['different', '"In"', '. Elizabeth'];
 }
 
 echo '<!DOCTYPE html>

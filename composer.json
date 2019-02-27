@@ -22,8 +22,5 @@
             ]
         }
     },
-    "minimum-stability": "dev",
-    "require": {
-        "writecrow/lemmatizer": "dev-master"
-    }
+    "minimum-stability": "dev"
 }
