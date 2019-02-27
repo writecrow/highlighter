@@ -1,0 +1,29 @@
+{
+    "name": "writecrow/highlighter",
+    "description": "Highlights words/phrases per specified parameters",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Fullmer",
+            "email": "mfullmer@gmail.com"
+        }
+    ],
+    "support": {
+        "email": "collaborate@writecrow.org",
+        "issues": "https://github.com/writecrow/highlighter/issues",
+        "source": "https://github.com/writecrow/highlighter"
+    },
+    "autoload": {
+        "psr-4": {
+            "writecrow\\Highlighter\\": [
+                "src/",
+                "test/"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "writecrow/lemmatizer": "dev-master"
+    }
+}
