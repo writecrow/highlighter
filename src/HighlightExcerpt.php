@@ -60,7 +60,7 @@ class HighlightExcerpt {
       if (empty($token)) {
         continue;
       }
-      $matches[$token] = self::findFirstMatchPosition($text, $token);
+      $matches[$token] = self::findFirstMatchPosition($text, strip_tags($token));
     }
     if (empty($matches)) {
       return substr($text, 0, $length);

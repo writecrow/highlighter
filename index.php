@@ -35,7 +35,7 @@ echo '
 <div class="container">
   <div class="row">
   <div class="six twelve columns">
-    <span><h3>PHP Highlighter</h3><span class="u-pull-right">Source code: <a  href="https://github.com/writecrow/highlighter">https://github.com/writecrow/highlighter</a></span><hr />
+    <span><h3>PHP Highlighter</h3><span class="u-pull-right">Source code: <a  href="https://github.com/writecrow/highlighter">https://github.com/writecrow/highlighter</a></span><br /><hr />
   </div>
   <div class="six twelve columns">
     <h4>Text to be highlighted:</h4>' . $text . '<hr />
@@ -45,12 +45,12 @@ echo '
     <div class="row">
       <div class="twelve columns">
         <label for="token1">Word/phrase to be highlighted</label>
-        <input name="token1" value=\'' . $tokens[0] . '\'>
-        <input name="token2" value=\'' . $tokens[1] . '\'>
-        <input name="token3" value=\'' . $tokens[2] . '\'>
+        <input name="token1" value=\'' . strip_tags($tokens[0]) . '\'>
+        <input name="token2" value=\'' . strip_tags($tokens[1]) . '\'>
+        <input name="token3" value=\'' . strip_tags($tokens[2]) . '\'>
         <input type="submit" value="Highlight" />';
 echo '<div><h4>Highlighted Excerpts</h4>';
-echo HighlightExcerpt::highlight($text, $tokens, $method = 'word', $length = 350);
+echo HighlightExcerpt::highlight($text, $tokens, $length = 350);
 echo '</div>';
 echo '
       </div>
