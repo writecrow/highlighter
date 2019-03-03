@@ -43,6 +43,7 @@ class HighlightExcerpt {
     $excerpt_list = [];
     $matches = [];
     $excerpt = "";
+    $excerpt_list = [];
     $text = strip_tags($text);
     // We pad this so that matches at the beginning & end of text are honoured.
     $text = ' ' . $text . ' ';
@@ -67,6 +68,9 @@ class HighlightExcerpt {
     }
     // Create the concatenated excerpt, pre-highlighting.
     foreach ($matches as $match) {
+      if (count($excerpt_list >= 5)) {
+        break;
+      }
       if ($match['pos'] >= 0) {
         // If this is more than 50 characters into the start of the text,
         // start the excerpt at 50 characters before the instance.
