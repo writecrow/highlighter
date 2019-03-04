@@ -68,7 +68,7 @@ class HighlightExcerpt {
     }
     // Create the concatenated excerpt, pre-highlighting.
     foreach ($matches as $match) {
-      if (count($excerpt_list >= 5)) {
+      if (count($excerpt_list) >= 5) {
         break;
       }
       if ($match['pos'] >= 0) {
@@ -98,13 +98,14 @@ class HighlightExcerpt {
     foreach ($matches as $match) {
       if ($match['pos'] >= 0) {
         if ($match['sensitive']) {
-          $excerpt = preg_replace($rstart . $match['string'] . $rend, $replacement, $excerpt);
+          $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
+          $excerpt = preg_replace($match['rstart'] . $match['string'] . $match['rend'], $replacement, $excerpt);
         }
         else {
           $replacement = $match['f'] . '<mark>' . strtolower($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($rstart . strtolower($match['string']) . $rend, $replacement, $excerpt);
+          $excerpt = preg_replace($match['rstart'] . strtolower($match['string']) . $match['rend'], $replacement, $excerpt);
           $replacement = $match['f'] . '<mark>' . ucfirst($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($rstart . ucfirst($match['string']) . $rend, $replacement, $excerpt);
+          $excerpt = preg_replace($match['rstart'] . ucfirst($match['string']) . $match['rend'], $replacement, $excerpt);
         }
       }
     }
