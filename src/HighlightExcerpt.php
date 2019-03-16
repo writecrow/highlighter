@@ -61,16 +61,13 @@ class HighlightExcerpt {
       if (empty($token)) {
         continue;
       }
-      $matches[$token] = self::findFirstMatchPosition($text, strip_tags($token));
+      $matches[$token] = self::findFirstMatchPosition($text, strip_tags($token, "<name><place><date>"));
     }
     if (empty($matches)) {
       return substr($text, 0, $length);
     }
     // Create the concatenated excerpt, pre-highlighting.
     foreach ($matches as $match) {
-      // if (count($excerpt_list) >= 5) {
-      //   break;
-      // }
       if ($match['pos'] >= 0) {
         // If this is more than 50 characters into the start of the text,
         // start the excerpt at 50 characters before the instance.
@@ -79,15 +76,6 @@ class HighlightExcerpt {
         $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
         $excerpt = substr($text, $start, $ideal_length);
         $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
-        if ($match['sensitive']) {
-          $excerpt = preg_replace($rstart . $match['string'] . $rend, $replacement, $excerpt);
-        }
-        else {
-          $replacement = $match['f'] . '<mark>' . strtolower($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($rstart . strtolower($match['string']) . $rend, $replacement, $excerpt);
-          $replacement = $match['f'] . '<mark>' . ucfirst($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($rstart . ucfirst($match['string']) . $rend, $replacement, $excerpt);
-        }
         // Try to trim the excerpt to a word boundary.
         $word_boundary = substr($excerpt, strpos($excerpt, ' '), strrpos($excerpt, ' '));
         $excerpt_list[] = "..." . $word_boundary . "...";
@@ -99,13 +87,13 @@ class HighlightExcerpt {
       if ($match['pos'] >= 0) {
         if ($match['sensitive']) {
           $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
-          $excerpt = preg_replace($match['rstart'] . $match['string'] . $match['rend'], $replacement, $excerpt);
+          $excerpt = preg_replace($match['rstart'] . preg_quote($match['string']) . $match['rend'], $replacement, $excerpt);
         }
         else {
           $replacement = $match['f'] . '<mark>' . strtolower($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($match['rstart'] . strtolower($match['string']) . $match['rend'], $replacement, $excerpt);
+          $excerpt = preg_replace($match['rstart'] . preg_quote(strtolower($match['string'])) . $match['rend'], $replacement, $excerpt);
           $replacement = $match['f'] . '<mark>' . ucfirst($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($match['rstart'] . ucfirst($match['string']) . $match['rend'], $replacement, $excerpt);
+          $excerpt = preg_replace($match['rstart'] . preg_quote(ucfirst($match['string'])) . $match['rend'], $replacement, $excerpt);
         }
       }
     }
@@ -146,7 +134,7 @@ class HighlightExcerpt {
     if (!$quoted) {
       $preg_i = 'i';
     }
-    preg_match($rstart . $token . $rend . $preg_i, $text, $match);
+    preg_match($rstart . preg_quote($token) . $rend . $preg_i, $text, $match);
     if (isset($match[0])) {
       $first_char = substr($match[0], 0, 1);
       $last_char = substr($match[0], -1);
