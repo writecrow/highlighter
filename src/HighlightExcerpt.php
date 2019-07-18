@@ -44,7 +44,9 @@ class HighlightExcerpt {
     $matches = [];
     $excerpt = "";
     $excerpt_list = [];
-    $text = htmlentities(strip_tags($text, "<name><date><place>"));
+    if ($length !== FALSE) {
+      $text = htmlentities(strip_tags($text, "<name><date><place>"));
+    }
     // We pad this so that matches at the beginning & end of text are honoured.
     $text = ' ' . $text . ' ';
     if (empty($tokens)) {
@@ -66,22 +68,28 @@ class HighlightExcerpt {
     if (empty($matches)) {
       return substr($text, 0, $length);
     }
-    // Create the concatenated excerpt, pre-highlighting.
-    foreach ($matches as $match) {
-      if ($match['pos'] >= 0) {
-        // If this is more than 50 characters into the start of the text,
-        // start the excerpt at 50 characters before the instance.
-        $rstart = $match['rstart'];
-        $rend = $match['rend'];
-        $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
-        $excerpt = substr($text, $start, $ideal_length);
-        $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
-        // Try to trim the excerpt to a word boundary.
-        $word_boundary = substr($excerpt, strpos($excerpt, ' '), strrpos($excerpt, ' '));
-        $excerpt_list[] = "..." . $word_boundary . "...";
+    if ($length === FALSE) {
+      $excerpt = $text;
+    }
+    else {
+      // Create the concatenated excerpt, pre-highlighting.
+      foreach ($matches as $match) {
+        if ($match['pos'] >= 0) {
+          // If this is more than 50 characters into the start of the text,
+          // start the excerpt at 50 characters before the instance.
+          $rstart = $match['rstart'];
+          $rend = $match['rend'];
+          $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
+          $excerpt = substr($text, $start, $ideal_length);
+          $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
+          // Try to trim the excerpt to a word boundary.
+          $word_boundary = substr($excerpt, strpos($excerpt, ' '), strrpos($excerpt, ' '));
+          $excerpt_list[] = "..." . $word_boundary . "...";
+        }
+        $excerpt = implode('<br />', $excerpt_list);
       }
     }
-    $excerpt = implode('<br />', $excerpt_list);
+
     // Now that the excerpt(s) are created, highlight all instances.
     foreach ($matches as $match) {
       if ($match['pos'] >= 0) {
