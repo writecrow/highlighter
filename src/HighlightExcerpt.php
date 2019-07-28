@@ -45,7 +45,7 @@ class HighlightExcerpt {
     $excerpt = "";
     $excerpt_list = [];
     if ($length !== FALSE) {
-      $text = htmlentities(strip_tags($text, "<name><date><place>"));
+      $text = strip_tags($text, "<name><date><place>");
     }
     // We pad this so that matches at the beginning & end of text are honoured.
     $text = ' ' . $text . ' ';
