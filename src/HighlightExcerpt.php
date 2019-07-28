@@ -98,14 +98,30 @@ class HighlightExcerpt {
           $excerpt = preg_replace($match['rstart'] . preg_quote($match['string']) . $match['rend'], $replacement, $excerpt);
         }
         else {
-          $replacement = $match['f'] . '<mark>' . strtolower($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($match['rstart'] . preg_quote(strtolower($match['string'])) . $match['rend'], $replacement, $excerpt);
-          $replacement = $match['f'] . '<mark>' . ucfirst($match['string']) . '</mark>' . $match['l'];
-          $excerpt = preg_replace($match['rstart'] . preg_quote(ucfirst($match['string'])) . $match['rend'], $replacement, $excerpt);
+          $replacement = $match['f'] . '<mark>' . mb_strtolower($match['string']) . '</mark>' . $match['l'];
+          $excerpt = preg_replace($match['rstart'] . preg_quote(mb_strtolower($match['string'])) . $match['rend'], $replacement, $excerpt);
+          $replacement = $match['f'] . '<mark>' . self::mbUcfirst($match['string']) . '</mark>' . $match['l'];
+          $excerpt = preg_replace($match['rstart'] . preg_quote(self::mbUcfirst($match['string'])) . $match['rend'], $replacement, $excerpt);
         }
       }
     }
     return $excerpt;
+  }
+
+  /**
+   * Helper function to uppercase multibyte strings.
+   */
+  public static function mbUcfirst($str, $encoding = "UTF-8", $lower_str_end = FALSE) {
+    $first_letter = mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding);
+    $str_end = "";
+    if ($lower_str_end) {
+      $str_end = mb_mb_strtolower(mb_substr($str, 1, mb_strlen($str, $encoding), $encoding), $encoding);
+    }
+    else {
+      $str_end = mb_substr($str, 1, mb_strlen($str, $encoding), $encoding);
+    }
+    $str = $first_letter . $str_end;
+    return $str;
   }
 
   /**
