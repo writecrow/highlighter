@@ -50,7 +50,7 @@ class HighlightExcerpt {
     // We pad this so that matches at the beginning & end of text are honoured.
     $text = ' ' . $text . ' ';
     if (empty($tokens)) {
-      return substr($text, 0, $length);
+      return mb_substr($text, 0, $length);
     }
     foreach ($tokens as $key => $value) {
       if (empty($value)) {
@@ -66,7 +66,7 @@ class HighlightExcerpt {
       $matches[$token] = self::findFirstMatchPosition($text, strip_tags($token, "<name><place><date>"));
     }
     if (empty($matches)) {
-      return substr($text, 0, $length);
+      return mb_substr($text, 0, $length);
     }
     if ($length === FALSE) {
       $excerpt = $text;
@@ -80,11 +80,10 @@ class HighlightExcerpt {
           $rstart = $match['rstart'];
           $rend = $match['rend'];
           $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
-          $excerpt = substr($text, $start, $ideal_length);
+          $excerpt = mb_substr($text, $start, $ideal_length);
           $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
           // Try to trim the excerpt to a word boundary.
-          $word_boundary = substr($excerpt, strpos($excerpt, ' '), strrpos($excerpt, ' '));
-          $excerpt_list[] = "..." . $word_boundary . "...";
+          $excerpt_list[] = "..." . $excerpt . "...";
         }
         $excerpt = implode('<br />', $excerpt_list);
       }
@@ -105,7 +104,11 @@ class HighlightExcerpt {
         }
       }
     }
-    return $excerpt;
+    // Finally, ensure that problematic characters are encoded (particularly for JSON).
+    $str = htmlentities($excerpt,ENT_NOQUOTES,'UTF-8', FALSE);
+    $str = str_replace(array('&lt;','&gt;'),array('<','>'), $str);
+    $str = str_replace(array('&amp;lt;','&amp;gt'),array('&lt;','&gt;'), $str);
+    return $str;
   }
 
   /**
@@ -139,34 +142,34 @@ class HighlightExcerpt {
     $falpha = 'alpha_only';
     $preg_i = '';
     $lalpha = 'alpha_only';
-    $first = substr($token, 0, 1);
-    $last = substr($token, -1);
+    $first = mb_substr($token, 0, 1);
+    $last = mb_substr($token, -1);
     if ($first == '"' && $last == '"') {
       $token = trim($token, '"');
       $quoted = TRUE;
     }
-    preg_match('/[^a-zA-Z]/', substr($token, 0, 1), $non_alpha);
+    preg_match('/[^a-zA-Z]/', mb_substr($token, 0, 1), $non_alpha);
     if (isset($non_alpha[0])) {
       $falpha = 'non_alpha_only';
     }
-    preg_match('/[^a-zA-Z]/', substr($token, -1), $non_alpha);
+    preg_match('/[^a-zA-Z]/', mb_substr($token, -1), $non_alpha);
     if (isset($non_alpha[0])) {
       $lalpha = 'non_alpha_only';
     }
     $rstart = self::$regex{$falpha}['start'];
     $rend = self::$regex{$lalpha}['end'];
     if (!$quoted) {
-      $preg_i = 'i';
+      $preg_i = 'iu';
     }
     preg_match($rstart . preg_quote($token) . $rend . $preg_i, $text, $match);
     if (isset($match[0])) {
-      $first_char = substr($match[0], 0, 1);
-      $last_char = substr($match[0], -1);
+      $first_char = mb_substr($match[0], 0, 1);
+      $last_char = mb_substr($match[0], -1);
       if ($quoted) {
-        $pos = strpos($text, $match[0]);
+        $pos = mb_strpos($text, $match[0]);
       }
       else {
-        $pos = stripos($text, $match[0]);
+        $pos = mb_stripos($text, $match[0]);
       }
       if ($pos >= 0) {
         return [
