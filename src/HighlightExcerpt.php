@@ -82,7 +82,6 @@ class HighlightExcerpt {
           $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
           $excerpt = mb_substr($text, $start, $ideal_length);
           $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
-          // Try to trim the excerpt to a word boundary.
           $excerpt_list[] = "..." . $excerpt . "...";
         }
         $excerpt = implode('<br />', $excerpt_list);
