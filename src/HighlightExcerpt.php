@@ -44,8 +44,9 @@ class HighlightExcerpt {
     $matches = [];
     $excerpt = "";
     $excerpt_list = [];
+    $text = preg_replace('~[\r\n]+~u', '<br> ', $text);
     if ($length !== FALSE) {
-      $text = strip_tags($text, "<name><date><place>");
+      $text = str_replace("<br>", " ", $text);
     }
     // We pad this so that matches at the beginning & end of text are honoured.
     $text = ' ' . $text . ' ';
