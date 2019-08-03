@@ -17,8 +17,8 @@ class HighlightExcerpt {
 
   private static $regex = [
     'alpha_only' => [
-      'start' => '/[^a-zA-Z>]',
-      'end' => '[^a-zA-Z<]/',
+      'start' => '/[\s\p{P}]',
+      'end' => '[\s\p{P}]/',
     ],
     'non_alpha_only' => [
       'start' => '/(.)',
@@ -66,6 +66,7 @@ class HighlightExcerpt {
       }
       $matches[$token] = self::findFirstMatchPosition($text, strip_tags($token, "<name><place><date>"));
     }
+    print_r($matches);
     if (empty($matches)) {
       return mb_substr($text, 0, $length);
     }
@@ -148,11 +149,11 @@ class HighlightExcerpt {
       $token = trim($token, '"');
       $quoted = TRUE;
     }
-    preg_match('/[^a-zA-Z]/', mb_substr($token, 0, 1), $non_alpha);
+    preg_match('/[\s\p{P}]/u', mb_substr($token, 0, 1), $non_alpha);
     if (isset($non_alpha[0])) {
       $falpha = 'non_alpha_only';
     }
-    preg_match('/[^a-zA-Z]/', mb_substr($token, -1), $non_alpha);
+    preg_match('/[\s\p{P}]/u', mb_substr($token, -1), $non_alpha);
     if (isset($non_alpha[0])) {
       $lalpha = 'non_alpha_only';
     }
@@ -161,6 +162,7 @@ class HighlightExcerpt {
     if (!$quoted) {
       $preg_i = 'iu';
     }
+    print_r($rstart . preg_quote($token) . $rend . $preg_i);
     preg_match($rstart . preg_quote($token) . $rend . $preg_i, $text, $match);
     if (isset($match[0])) {
       $first_char = mb_substr($match[0], 0, 1);
