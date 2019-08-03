@@ -66,7 +66,6 @@ class HighlightExcerpt {
       }
       $matches[$token] = self::findFirstMatchPosition($text, strip_tags($token, "<name><place><date>"));
     }
-    print_r($matches);
     if (empty($matches)) {
       return mb_substr($text, 0, $length);
     }
@@ -162,7 +161,6 @@ class HighlightExcerpt {
     if (!$quoted) {
       $preg_i = 'iu';
     }
-    print_r($rstart . preg_quote($token) . $rend . $preg_i);
     preg_match($rstart . preg_quote($token) . $rend . $preg_i, $text, $match);
     if (isset($match[0])) {
       $first_char = mb_substr($match[0], 0, 1);
