@@ -39,7 +39,7 @@ class HighlightExcerpt {
    * @return string
    *    The highlighted text.
    */
-  public static function highlight($text, array $tokens, $length = '300') {
+  public static function highlight($text, array $tokens, $length = '300', $type = 'concat') {
     $excerpt_list = [];
     $matches = [];
     $excerpt = "";
@@ -72,17 +72,30 @@ class HighlightExcerpt {
     if ($length === FALSE) {
       $excerpt = $text;
     }
+    elseif ($type === 'fixed') {
+      // Do not create a concatenated string for the excerpt.
+      // Just get the first match.
+      foreach ($matches as $match) {
+        if ($match['pos'] >= 0) {
+          // If this is more than 50 characters into the start of the text,
+          // start the excerpt at 50 characters before the instance.
+          $start = $match['pos'] - 60 < 0 ? 0 : $match['pos'] - 60;
+          $excerpt = mb_substr($text, $start, $match['pos'] + 60 + mb_strlen($match['string']) - $start);
+          if ($start == 0) {
+            $excerpt = self::mbStrPad($excerpt, 120 + mb_strlen($match['string']));
+          }
+          break;
+        }
+      }
+    }
     else {
       // Create the concatenated excerpt, pre-highlighting.
       foreach ($matches as $match) {
         if ($match['pos'] >= 0) {
           // If this is more than 50 characters into the start of the text,
           // start the excerpt at 50 characters before the instance.
-          $rstart = $match['rstart'];
-          $rend = $match['rend'];
           $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
           $excerpt = mb_substr($text, $start, $ideal_length);
-          $replacement = $match['f'] . '<mark>' . $match['string'] . '</mark>' . $match['l'];
           $excerpt_list[] = "..." . $excerpt . "...";
         }
         $excerpt = implode('<br />', $excerpt_list);
@@ -104,10 +117,11 @@ class HighlightExcerpt {
         }
       }
     }
-    // Finally, ensure that problematic characters are encoded (particularly for JSON).
-    $str = htmlentities($excerpt,ENT_NOQUOTES,'UTF-8', FALSE);
-    $str = str_replace(array('&lt;','&gt;'),array('<','>'), $str);
-    $str = str_replace(array('&amp;lt;','&amp;gt'),array('&lt;','&gt;'), $str);
+    // Finally, ensure that problematic characters are encoded
+    // (particularly for JSON).
+    $str = htmlentities($excerpt, ENT_NOQUOTES, 'UTF-8', FALSE);
+    $str = str_replace(['&lt;', '&gt;'], ['<', '>'], $str);
+    $str = str_replace(['&amp;lt;', '&amp;gt'], ['&lt;', '&gt;'], $str);
     return $str;
   }
 
@@ -200,6 +214,26 @@ class HighlightExcerpt {
       default:
         return (int) $length / 3;
     }
+  }
+
+  /**
+   * Multibye str_pad.
+   *
+   * @param string $input
+   *   The input.
+   * @param int $pad_length
+   *   The amount to pad.
+   * @param string $pad_string
+   *   The character to use.
+   * @param int $pad_type
+   *   Left, right, or both.
+   *
+   * @return string
+   *   The padded string.
+   */
+  private static function mbStrPad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_LEFT) {
+    $diff = strlen($input) - mb_strlen($input);
+    return str_pad($input, $pad_length + $diff, $pad_string, $pad_type);
   }
 
 }
