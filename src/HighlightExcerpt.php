@@ -132,7 +132,7 @@ class HighlightExcerpt {
     $first_letter = mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding);
     $str_end = "";
     if ($lower_str_end) {
-      $str_end = mb_mb_strtolower(mb_substr($str, 1, mb_strlen($str, $encoding), $encoding), $encoding);
+      $str_end = mb_strtolower(mb_substr($str, 1, mb_strlen($str, $encoding), $encoding), $encoding);
     }
     else {
       $str_end = mb_substr($str, 1, mb_strlen($str, $encoding), $encoding);
@@ -170,8 +170,8 @@ class HighlightExcerpt {
     if (isset($non_alpha[0])) {
       $lalpha = 'non_alpha_only';
     }
-    $rstart = self::$regex{$falpha}['start'];
-    $rend = self::$regex{$lalpha}['end'];
+    $rstart = self::$regex[$falpha]['start'];
+    $rend = self::$regex[$lalpha]['end'];
     if (!$quoted) {
       $preg_i = 'iu';
     }
