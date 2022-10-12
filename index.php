@@ -21,13 +21,35 @@ if (isset($_POST['token3'])) {
   $tokens[] = $_POST['token3'];
 }
 if (empty($tokens)) {
-  $tokens = ['different', '"In"', '. Elizabeth'];
+  $tokens = ['Elizabeth'];
 }
-
+$type = "crowcordance";
+if (isset($_POST['type'])) {
+  $type = $_POST['type'];
+}
 echo '<!DOCTYPE html>
 <html>
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+<style>
+  .kwic {
+    width: 100%;
+  }
+  .kwic span {
+    display: inline-block;
+  }
+  .before {
+    text-align: right;
+    width: 40%
+  }
+  .target {
+    padding: 0 1ch;
+  }
+  .after {
+    text-align: left;
+    width: 40%;
+  }
+</style>
 </head>
 <body>';
 
@@ -48,9 +70,21 @@ echo '
         <input name="token1" value=\'' . strip_tags($tokens[0]) . '\'>
         <input name="token2" value=\'' . strip_tags($tokens[1]) . '\'>
         <input name="token3" value=\'' . strip_tags($tokens[2]) . '\'>
+        <br />
+        <strong>Highlight style</strong>
+        <select name="type">
+          <option value="crowcordance">"Crowcordance"</option>
+          <option value="kwic">Keyword in context</option>
+          <option value="default">Multiple matching excerpts</option>
+        </select>
+        <ul>
+          <li>"Crowcordance" attempts to render full sentences on either side of the target word. If full sentences are not present, it will render what is available.</li>
+          <li>"Keyword in Context" attempts to render 10 words on either side of the target word.</li>
+          <li>"Multiple matching excerpts" attempts to highlight multiple target words, if provided, similar to a search engine result excerpt</li>
+        </ul>
         <input type="submit" value="Highlight" />';
-echo '<div><h4>Highlighted Excerpts</h4>';
-echo HighlightExcerpt::highlight($text, $tokens, $length = 350);
+echo '<div><h4>Highlighted Excerpt</h4>';
+echo HighlightExcerpt::highlight($text, $tokens, $length = 350, $type);
 echo '</div>';
 echo '
       </div>

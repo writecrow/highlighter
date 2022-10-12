@@ -45,20 +45,23 @@ class HighlightExcerpt {
     $excerpt = "";
     $excerpt_list = [];
     $text = preg_replace('~[\r\n]+~u', '<br> ', $text);
+    // Remove HTML.
+    $text = strip_tags($text);
     if ($length !== FALSE) {
       $text = str_replace("<br>", " ", $text);
     }
     // We pad this so that matches at the beginning & end of text are honoured.
     $text = ' ' . $text . ' ';
+    // There are no terms to highlight. Just return the ideal length.
     if (empty($tokens)) {
       return mb_substr($text, 0, $length);
     }
+    // Clean empty tokens.
     foreach ($tokens as $key => $value) {
       if (empty($value)) {
         unset($tokens[$key]);
       }
     }
-    $ideal_length = self::getIdealLength($length, count($tokens));
     // The first loop simply retrieves the match metadata.
     foreach ($tokens as $token) {
       if (empty($token)) {
@@ -69,39 +72,37 @@ class HighlightExcerpt {
     if (empty($matches)) {
       return mb_substr($text, 0, $length);
     }
-    if ($length === FALSE) {
-      $excerpt = $text;
-    }
-    elseif ($type === 'fixed') {
-      // Do not create a concatenated string for the excerpt.
-      // Just get the first match.
-      foreach ($matches as $match) {
-        if ($match['pos'] >= 0) {
-          // If this is more than 50 characters into the start of the text,
-          // start the excerpt at 50 characters before the instance.
-          $start = $match['pos'] - 60 < 0 ? 0 : $match['pos'] - 60;
-          $excerpt = mb_substr($text, $start, $match['pos'] + 60 + mb_strlen($match['string']) - $start);
-          if ($start == 0) {
-            $excerpt = self::mbStrPad($excerpt, 120 + mb_strlen($match['string']));
-          }
-          break;
-        }
-      }
-    }
-    else {
-      // Create the concatenated excerpt, pre-highlighting.
-      foreach ($matches as $match) {
-        if ($match['pos'] >= 0) {
-          // If this is more than 50 characters into the start of the text,
-          // start the excerpt at 50 characters before the instance.
-          $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
-          $excerpt = mb_substr($text, $start, $ideal_length);
-          $excerpt_list[] = "..." . $excerpt . "...";
-        }
-        $excerpt = implode('<br />', $excerpt_list);
-      }
-    }
 
+    switch ($type) {
+      case 'fixed':
+        $excerpt = self::getFixed($text, $matches);
+        break;
+      case 'kwic':
+        $excerpt = self::getKwic($text, $tokens);
+        break;
+
+      case 'crowcordance':
+        $excerpt = self::getCrowcordance($text, $tokens);
+        break;
+
+      default:
+        $ideal_length = self::getIdealLength($length, count($tokens));
+        if ($length === FALSE) {
+          $excerpt = $text;
+        }
+        // Create the concatenated excerpt, pre-highlighting.
+        foreach ($matches as $match) {
+          if ($match['pos'] >= 0) {
+            // If this is more than 50 characters into the start of the text,
+            // start the excerpt at 50 characters before the instance.
+            $start = $match['pos'] - 50 < 0 ? 0 : $match['pos'] - 50;
+            $excerpt = mb_substr($text, $start, $ideal_length);
+            $excerpt_list[] = "..." . $excerpt . "...";
+          }
+          $excerpt = implode('<br />', $excerpt_list);
+        }
+        break;
+    }
     // Now that the excerpt(s) are created, highlight all instances.
     foreach ($matches as $match) {
       if ($match['pos'] >= 0) {
@@ -117,12 +118,143 @@ class HighlightExcerpt {
         }
       }
     }
+    if ($type === 'kwic') {
+      $parts = explode(" ", $excerpt);
+      $chunks = ['<span class="before">'];
+      for ($i = 0; $i < 10; ++$i) {
+        $chunks[] = $parts[$i] . ' ';
+      }
+      $chunks[] = '</span><span class="target"> ' . $parts[10] . '</span><span class="after">';
+      for ($i = 11; $i < 20; ++$i) {
+        $chunks[] = $parts[$i] . ' ';
+      }
+      $chunks[] = '</span>';
+      $excerpt = implode("", $chunks);
+    }
     // Finally, ensure that problematic characters are encoded
     // (particularly for JSON).
     $str = htmlentities($excerpt, ENT_NOQUOTES, 'UTF-8', FALSE);
     $str = str_replace(['&lt;', '&gt;'], ['<', '>'], $str);
     $str = str_replace(['&amp;lt;', '&amp;gt'], ['&lt;', '&gt;'], $str);
     return $str;
+  }
+
+  public static function splitSentences($text) {
+    $split_sentences = '%(?#!php/i split_sentences Rev:20160820_1800)
+    # Split sentences on whitespace between them.
+    # See: http://stackoverflow.com/a/5844564/433790
+    (?<=          # Sentence split location preceded by
+      [.!?]       # either an end of sentence punct,
+    | [.!?][\'"]  # or end of sentence punct and quote.
+    )             # End positive lookbehind.
+    (?<!          # But don\'t split after these:
+      Mr\.        # Either "Mr."
+    | Mrs\.       # Or "Mrs."
+    | Ms\.        # Or "Ms."
+    | Jr\.        # Or "Jr."
+    | Dr\.        # Or "Dr."
+    | Prof\.      # Or "Prof."
+    | Sr\.        # Or "Sr."
+    | T\.V\.A\.   # Or "T.V.A."
+                 # Or... (you get the idea).
+    )             # End negative lookbehind.
+    \s+           # Split on whitespace between sentences,
+    (?=\S)        # (but not at end of string).
+    %xi';
+    return preg_split($split_sentences, $text, -1, PREG_SPLIT_NO_EMPTY);
+  }
+
+  public static function getFixed($text, $matches) {
+    foreach ($matches as $match) {
+      if ($match['pos'] >= 0) {
+        // If this is more than 50 characters into the start of the text,
+        // start the excerpt at 50 characters before the instance.
+        $start = $match['pos'] - 60 < 0 ? 0 : $match['pos'] - 60;
+        $excerpt = mb_substr($text, $start, $match['pos'] + 60 + mb_strlen($match['string']) - $start);
+        if ($start == 0) {
+          $excerpt = self::mbStrPad($excerpt, 120 + mb_strlen($match['string']));
+        }
+        break;
+      }
+    }
+    return $excerpt;
+  }
+
+  public static function getKwic($text, $tokens) {
+    $words = explode(' ', $text);
+    $found = [];
+    for ($i = 0; $i < count($words); ++$i) {
+      if ($i < 9) {
+        // Don't bother checking the first 9 words.
+        continue;
+      }
+      foreach ($tokens as $token) {
+        if (mb_strpos(mb_strtolower($words[$i]), mb_strtolower($token)) !== FALSE) {
+          $found[] = $i;
+        }
+        if ($i > 20 && count($found) > 0) {
+          // If we have a match in the first 20 words, stop looking.
+          break;
+        }
+      }
+    }
+    if (!empty($found)) {
+      $start = reset($found) - 10;
+      $end = reset($found) + 10;
+      for ($i = $start; $i < $end; ++$i) {
+        if (isset($words[$i])) {
+          $output[] = $words[$i];
+        }
+        else {
+          $output[] = '&nbsp;';
+        }
+      }
+    }
+    else {
+      $output = array_slice($words, 0, 19);
+    }
+    return implode(" ", $output);
+  }
+
+  public static function getCrowcordance($text, $tokens) {
+    $text = mb_convert_encoding($text, 'UTF-8', mb_list_encodings());
+    $sentences = self::splitSentences($text);
+    $inc = 0;
+    $found = [];
+    for ($i = 0; $i < count($sentences); ++$i) {
+      foreach ($tokens as $token) {
+        if (mb_strpos(mb_strtolower($sentences[$i]), mb_strtolower($token)) !== FALSE) {
+          $found[] = $i;
+        }
+      }
+    }
+    if (empty($found)) {
+      return '';
+    }
+    // Handle scenario where the only sentence with a target token is the 1st.
+    if (count($found) === 1 && $found == [0]) {
+      // The only sentence in the text with the token is the first.
+      $string = $sentences[0];
+      if (isset($sentences[1])) {
+        $string .= ' ' . $sentences[1];
+      }
+      return $string;
+    }
+    $output = [];
+    $first_match = reset($found);
+    if ($first_match === 0) {
+      array_shift($found);
+      $first_match = reset($found);
+    }
+    $preceding_sentence = (int) ($first_match - 1);
+    $following_sentence = (int) ($first_match + 1);
+    $output[] = $sentences[$preceding_sentence];
+    $output[] = $sentences[$first_match];
+    // Add the subsequent sentence if it is present.
+    if (isset($sentences[$following_sentence])) {
+      $output[] = $sentences[$following_sentence];
+    }
+    return implode(" ", $output);
   }
 
   /**
