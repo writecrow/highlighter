@@ -248,7 +248,9 @@ class HighlightExcerpt {
     }
     $preceding_sentence = (int) ($first_match - 1);
     $following_sentence = (int) ($first_match + 1);
-    $output[] = $sentences[$preceding_sentence];
+    if (isset($sentences[$preceding_sentence])) {
+      $output[] = $sentences[$preceding_sentence];
+    }
     $output[] = $sentences[$first_match];
     // Add the subsequent sentence if it is present.
     if (isset($sentences[$following_sentence])) {

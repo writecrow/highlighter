@@ -21,7 +21,7 @@ if (isset($_POST['token3'])) {
   $tokens[] = $_POST['token3'];
 }
 if (empty($tokens)) {
-  $tokens = ['Elizabeth'];
+  $tokens = ['Elizabeth', '', ''];
 }
 $type = "crowcordance";
 if (isset($_POST['type'])) {
@@ -79,7 +79,7 @@ echo '
         </select>
         <ul>
           <li>"Crowcordance" attempts to render full sentences on either side of the target word. If full sentences are not present, it will render what is available.</li>
-          <li>"Keyword in Context" attempts to render 10 words on either side of the target word.</li>
+          <li>"Keyword in Context" attempts to render 0 words on either side of the target word.</li>
           <li>"Multiple matching excerpts" attempts to highlight multiple target words, if provided, similar to a search engine result excerpt</li>
         </ul>
         <input type="submit" value="Highlight" />';
