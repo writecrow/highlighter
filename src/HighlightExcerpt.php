@@ -30,19 +30,22 @@ class HighlightExcerpt {
    * Given a word, return its lemma form.
    *
    * @param string $text
-   *    The string to highlight.
+   *   The string to highlight.
    * @param string[] $tokens
-   *    The words/phrases to be highlighted.
+   *   The words/phrases to be highlighted.
    * @param int $length
-   *    The approximate target length of the entire excerpt.
+   *   The approximate target length of the entire excerpt.
+   * @param string $type
+   *   The type of highlighting to perform (fixed, kwic, crowcordance, concat).
    *
    * @return string
-   *    The highlighted text.
+   *   The highlighted text.
    */
   public static function highlight($text, array $tokens, $length = '300', $type = 'concat') {
     $excerpt_list = [];
     $matches = [];
-    $excerpt = "";
+    $excerpt = '';
+    $highlighted = '';
     $excerpt_list = [];
     $text = preg_replace('~[\r\n]+~u', '<br> ', $text);
     // Remove HTML.
@@ -76,13 +79,22 @@ class HighlightExcerpt {
     switch ($type) {
       case 'fixed':
         $excerpt = self::getFixed($text, $matches);
+        $highlighted = self::highlightSection($excerpt, $tokens, $matches);
         break;
+  
       case 'kwic':
-        $excerpt = self::getKwic($text, $tokens);
+        $highlighted = self::getKwic($text, $tokens);
         break;
 
       case 'crowcordance':
-        $excerpt = self::getCrowcordance($text, $tokens);
+        // Crowcordance will take care of highlighting the 'middle' sentence,
+        // so we just return its output;
+        $highlighted = self::getCrowcordance($text, $tokens);
+        break;
+
+      case 'all':
+        $excerpt = $text;
+        $highlighted = self::highlightSection($excerpt, $tokens, $matches);
         break;
 
       default:
@@ -101,8 +113,18 @@ class HighlightExcerpt {
           }
           $excerpt = implode('<br />', $excerpt_list);
         }
+        $highlighted = self::highlightSection($excerpt, $tokens, $matches);
         break;
     }
+    // Finally, ensure that problematic characters are encoded
+    // (particularly for JSON).
+    $str = htmlentities($highlighted, ENT_NOQUOTES, 'UTF-8', FALSE);
+    $str = str_replace(['&lt;', '&gt;'], ['<', '>'], $str);
+    $str = str_replace(['&amp;lt;', '&amp;gt'], ['&lt;', '&gt;'], $str);
+    return $str;
+  }
+
+  public static function highlightSection($excerpt, $tokens, $matches) {
     // Now that the excerpt(s) are created, highlight all instances.
     foreach ($matches as $match) {
       if ($match['pos'] >= 0) {
@@ -118,25 +140,7 @@ class HighlightExcerpt {
         }
       }
     }
-    if ($type === 'kwic') {
-      $parts = explode(" ", $excerpt);
-      $chunks = ['<span class="before">'];
-      for ($i = 0; $i < 10; ++$i) {
-        $chunks[] = $parts[$i] . ' ';
-      }
-      $chunks[] = '</span><span class="target"> ' . $parts[10] . '</span><span class="after">';
-      for ($i = 11; $i < 20; ++$i) {
-        $chunks[] = $parts[$i] . ' ';
-      }
-      $chunks[] = '</span>';
-      $excerpt = implode("", $chunks);
-    }
-    // Finally, ensure that problematic characters are encoded
-    // (particularly for JSON).
-    $str = htmlentities($excerpt, ENT_NOQUOTES, 'UTF-8', FALSE);
-    $str = str_replace(['&lt;', '&gt;'], ['<', '>'], $str);
-    $str = str_replace(['&amp;lt;', '&amp;gt'], ['&lt;', '&gt;'], $str);
-    return $str;
+    return $excerpt;
   }
 
   public static function splitSentences($text) {
@@ -192,7 +196,7 @@ class HighlightExcerpt {
         if (mb_strpos(mb_strtolower($words[$i]), mb_strtolower($token)) !== FALSE) {
           $found[] = $i;
         }
-        if ($i > 20 && count($found) > 0) {
+        if ($i > 21 && count($found) > 0) {
           // If we have a match in the first 20 words, stop looking.
           break;
         }
@@ -200,7 +204,7 @@ class HighlightExcerpt {
     }
     if (!empty($found)) {
       $start = reset($found) - 10;
-      $end = reset($found) + 10;
+      $end = reset($found) + 11;
       for ($i = $start; $i < $end; ++$i) {
         if (isset($words[$i])) {
           $output[] = $words[$i];
@@ -211,15 +215,29 @@ class HighlightExcerpt {
       }
     }
     else {
-      $output = array_slice($words, 0, 19);
+      $output = array_slice($words, 0, 21);
     }
-    return implode(" ", $output);
+    $chunks = ['<span class="before">'];
+    for ($i = 0; $i < 10; ++$i) {
+      $chunks[] = $output[$i] . ' ';
+    }
+    $chunks[] = '</span><span class="target"><mark>' . $output[10] . '</mark></span><span class="after">';
+    for ($i = 11; $i < 21; ++$i) {
+      $chunks[] = $output[$i] . ' ';
+    }
+    $chunks[] = '</span>';
+    $highlighted = implode("", $chunks);
+    return $highlighted;
   }
 
   public static function getCrowcordance($text, $tokens) {
+    $output = [
+      'pre' => '[BEGINNING OF TEXT]',
+      'target' => '',
+      'post' => '[END OF TEXT]',
+    ];
     $text = mb_convert_encoding($text, 'UTF-8', mb_list_encodings());
     $sentences = self::splitSentences($text);
-    $inc = 0;
     $found = [];
     for ($i = 0; $i < count($sentences); ++$i) {
       foreach ($tokens as $token) {
@@ -231,17 +249,15 @@ class HighlightExcerpt {
     if (empty($found)) {
       return '';
     }
-    // Handle scenario where the only sentence with a target token is the 1st.
+    // Handle scenario where the only the first sentence has a target.
     if (count($found) === 1 && $found == [0]) {
-      // The only sentence in the text with the token is the first.
-      $string = $sentences[0];
+      $output['target'] = $sentences[0];
       if (isset($sentences[1])) {
-        $string .= ' ' . $sentences[1];
+        $output['post'] = $sentences[1];
       }
-      return $string;
     }
-    $output = [];
     $first_match = reset($found);
+    // If the first of multiple matches is the first sentence, skip to the second;
     if ($first_match === 0) {
       array_shift($found);
       $first_match = reset($found);
@@ -249,14 +265,16 @@ class HighlightExcerpt {
     $preceding_sentence = (int) ($first_match - 1);
     $following_sentence = (int) ($first_match + 1);
     if (isset($sentences[$preceding_sentence])) {
-      $output[] = $sentences[$preceding_sentence];
+      $output['pre'] = $sentences[$preceding_sentence];
     }
-    $output[] = $sentences[$first_match];
+    $output['target'] = $sentences[$first_match];
     // Add the subsequent sentence if it is present.
     if (isset($sentences[$following_sentence])) {
-      $output[] = $sentences[$following_sentence];
+      $output['post'] = $sentences[$following_sentence];
     }
-    return implode(" ", $output);
+    // Highlight any tokens in ONLY the target sentence.
+    $output['target'] = self::highlight($output['target'], $tokens, FALSE, 'all');
+    return implode(" ", [$output['pre'], $output['target'], $output['post']]);
   }
 
   /**
