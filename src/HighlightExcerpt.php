@@ -255,7 +255,7 @@ class HighlightExcerpt {
     $sentences = self::splitSentences($text);
     $found = [];
     for ($i = 0; $i < count($sentences); ++$i) {
-      $clean_sentence = preg_replace("/\pP+/", "", $sentences[$i]);
+      $clean_sentence = preg_replace("/\pP+/", " ", $sentences[$i]);
       foreach ($tokens as $token) {
         $clean_token = preg_replace("/\pP+/", "", $token);
         if (mb_strpos(mb_strtolower($clean_sentence), mb_strtolower($clean_token . ' ')) !== FALSE) {
