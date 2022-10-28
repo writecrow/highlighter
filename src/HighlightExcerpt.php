@@ -193,9 +193,23 @@ class HighlightExcerpt {
         continue;
       }
       foreach ($tokens as $token) {
+        $quoted = FALSE;
+        $first = mb_substr($token, 0, 1);
+        $last = mb_substr($token, -1);
+        if ($first == '"' && $last == '"') {
+          $token = trim($token, '"');
+          $quoted = TRUE;
+        }
         $clean = preg_replace("/\pP+/", "", $words[$i]);
-        if (mb_strtolower($clean) === mb_strtolower($token)) {
-          $found[] = $i;
+        if ($quoted) {
+          if ($clean === $token) {
+            $found[] = $i;
+          }
+        }
+        else {
+          if (mb_strtolower($clean) === mb_strtolower($token)) {
+            $found[] = $i;
+          }
         }
       }
       if ($i > 21 && count($found) > 0) {
