@@ -193,13 +193,14 @@ class HighlightExcerpt {
         continue;
       }
       foreach ($tokens as $token) {
-        if (mb_strpos(mb_strtolower($words[$i]), mb_strtolower($token)) !== FALSE) {
+        $clean = preg_replace("/\pP+/", "", $words[$i]);
+        if (mb_strtolower($clean) === mb_strtolower($token)) {
           $found[] = $i;
         }
-        if ($i > 21 && count($found) > 0) {
-          // If we have a match in the first 20 words, stop looking.
-          break;
-        }
+      }
+      if ($i > 21 && count($found) > 0) {
+        // If we have a match in the first 20 words, stop looking.
+        break;
       }
     }
     if (!empty($found)) {
@@ -213,20 +214,20 @@ class HighlightExcerpt {
           $output[] = '&nbsp;';
         }
       }
+      $chunks = ['<span class="before">'];
+      for ($i = 0; $i < 10; ++$i) {
+        $chunks[] = $output[$i] . ' ';
+      }
+      $chunks[] = '</span><span class="target"><mark>' . $output[10] . '</mark></span><span class="after">';
+      for ($i = 11; $i < 21; ++$i) {
+        $chunks[] = $output[$i];
+      }
+      $chunks[] = '</span>';
     }
     else {
-      $output = array_slice($words, 0, 21);
+      $chunks = array_slice($words, 0, 21);
     }
-    $chunks = ['<span class="before">'];
-    for ($i = 0; $i < 10; ++$i) {
-      $chunks[] = $output[$i] . ' ';
-    }
-    $chunks[] = '</span><span class="target"><mark>' . $output[10] . '</mark></span><span class="after">';
-    for ($i = 11; $i < 21; ++$i) {
-      $chunks[] = $output[$i] . ' ';
-    }
-    $chunks[] = '</span>';
-    $highlighted = implode("", $chunks);
+    $highlighted = implode(" ", $chunks);
     return $highlighted;
   }
 

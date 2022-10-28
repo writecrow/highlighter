@@ -30,7 +30,7 @@ use writecrow\Highlighter\HighlightExcerpt;
 $texts = [
   'This is the first of three sentences and the first contains argue! This is the second sentence. This is a third sentence.',
   'This is the first sentence and contains argue. This is the second sentence and also contains argue. This is a third sentence. This is a very long sentence that should show up under some circumstances.',
-  'This is the first sentence. This is the second sentence and it contains argue. This is a third sentence.',
+  'This is the first sentence. This is the seconds sentence and it contains argue. This is a third sentence.',
   'This is the first sentence. This is the second sentence. This is a third sentence and it contains argue.',
 ];
 
