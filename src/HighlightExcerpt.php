@@ -291,7 +291,9 @@ class HighlightExcerpt {
     }
     // Highlight any tokens in ONLY the target sentence.
     $output['target'] = self::highlight($output['target'], $tokens, FALSE, 'all');
-    return implode(" ", [$output['pre'], $output['target'], $output['post']]);
+    $prepared = implode(" ", [$output['pre'], $output['target'], $output['post']]);
+    $prepared = trim($prepared);
+    return preg_replace('/\s+/', ' ', $prepared);
   }
 
   /**
