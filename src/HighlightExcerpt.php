@@ -79,7 +79,7 @@ class HighlightExcerpt {
     switch ($type) {
       case 'fixed':
         $excerpt = self::getFixed($text, $matches);
-        $highlighted = self::highlightSection($excerpt, $tokens, $matches);
+        $highlighted = self::highlightSection($excerpt, $matches);
         break;
   
       case 'kwic':
@@ -94,7 +94,7 @@ class HighlightExcerpt {
 
       case 'all':
         $excerpt = $text;
-        $highlighted = self::highlightSection($excerpt, $tokens, $matches);
+        $highlighted = self::highlightSection($excerpt, $matches);
         break;
 
       default:
@@ -113,7 +113,7 @@ class HighlightExcerpt {
           }
           $excerpt = implode('<br />', $excerpt_list);
         }
-        $highlighted = self::highlightSection($excerpt, $tokens, $matches);
+        $highlighted = self::highlightSection($excerpt, $matches);
         break;
     }
     // Finally, ensure that problematic characters are encoded
@@ -124,7 +124,7 @@ class HighlightExcerpt {
     return $str;
   }
 
-  public static function highlightSection($excerpt, $tokens, $matches) {
+  public static function highlightSection($excerpt, $matches) {
     // Now that the excerpt(s) are created, highlight all instances.
     foreach ($matches as $match) {
       if ($match['pos'] >= 0) {
@@ -241,9 +241,10 @@ class HighlightExcerpt {
     $sentences = self::splitSentences($text);
     $found = [];
     for ($i = 0; $i < count($sentences); ++$i) {
-      $clean = preg_replace("/\pP+/", "", $sentences[$i]);
+      $clean_sentence = preg_replace("/\pP+/", "", $sentences[$i]);
       foreach ($tokens as $token) {
-        if (mb_strpos(mb_strtolower($clean), mb_strtolower($token . ' ')) !== FALSE) {
+        $clean_token = preg_replace("/\pP+/", "", $token);
+        if (mb_strpos(mb_strtolower($clean_sentence), mb_strtolower($clean_token . ' ')) !== FALSE) {
           $found[] = $i;
         }
       }
