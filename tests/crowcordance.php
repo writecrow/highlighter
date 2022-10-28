@@ -11,9 +11,9 @@ $texts = [
   'This is the first sentence. This is the second sentence. This is a third sentence and it contains argue.',
 ];
 
-$tokens = ['argue'];
+$tokens = ['claim'];
 
-echo '<h2>Crowcordance output for "argue"</h2>';
+echo '<h2>Crowcordance output for "claim"</h2>';
 foreach ($texts as $key => $text) {
   echo '<div>';
   echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 350, $type = 'crowcordance');

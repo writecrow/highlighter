@@ -241,14 +241,15 @@ class HighlightExcerpt {
     $sentences = self::splitSentences($text);
     $found = [];
     for ($i = 0; $i < count($sentences); ++$i) {
+      $clean = preg_replace("/\pP+/", "", $sentences[$i]);
       foreach ($tokens as $token) {
-        if (mb_strpos(mb_strtolower($sentences[$i]), mb_strtolower($token)) !== FALSE) {
+        if (mb_strpos(mb_strtolower($clean), mb_strtolower($token . ' ')) !== FALSE) {
           $found[] = $i;
         }
       }
     }
     if (empty($found)) {
-      return '';
+      return 'Search term not found.';
     }
     // Handle scenario where the only the first sentence has a target.
     if (count($found) === 1 && $found == [0]) {
