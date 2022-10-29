@@ -1,7 +1,7 @@
 <?php
 require './../vendor/autoload.php';
 
-use writecrow\Highlighter\HighlightExcerpt;
+use writecrow\Highlighter\Highlighter;
 
 $tests = [];
 $tests[] = [
@@ -28,11 +28,23 @@ $tests[] = [
   'type' => 'crowcordance',
   'output' => 'This is the second sentence. This is a third sentence and it contains <mark>argue</mark>. [END OF TEXT]',
 ];
+$tests[] = [
+  'input' => 'This is the first sentence. This is the second sentence. This is a third sentence and it contains argue.',
+  'tokens' => ['argue'],
+  'type' => 'kwic',
+  'output' => '<span class="before">sentence. This is a third sentence and it contains </span><span class="target"><mark>argue</mark></span><span class="after">.                                               </span>',
+];
+$tests[] = [
+  'input' => 'This is the first sentence. This is the second sentence. This is a third sentence and it contains argue.',
+  'tokens' => ['"it contains"'],
+  'type' => 'kwic',
+  'output' => '<span class="before"> the second sentence. This is a third sentence and </span><span class="target"><mark>it contains</mark></span><span class="after"> argue.                                   </span>',
+];
 
 echo '<table border="1"><thead><td>Input</td><td>Search</td><td>Method</td><td>Output</td><td>Result</td></thead>';
 foreach ($tests as $test) {
   $result = 'FAIL';
-  $output = HighlightExcerpt::highlight($test['input'], $test['tokens'], FALSE, $test['type']);
+  $output = Highlighter::process($test['input'], $test['tokens'], FALSE, $test['type']);
   if ($output === $test['output']) {
     $result = 'PASS';
   }

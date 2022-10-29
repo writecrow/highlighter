@@ -1,6 +1,7 @@
 <style>
   .kwic {
     width: 100%;
+    font-family: monospace;
   }
 
   .kwic span {
@@ -13,7 +14,7 @@
   }
 
   .target {
-    padding: 0 1ch;
+    padding-left: 1ch;
   }
 
   .after {
@@ -25,7 +26,7 @@
 
 require './../vendor/autoload.php';
 
-use writecrow\Highlighter\HighlightExcerpt;
+use writecrow\Highlighter\Highlighter;
 
 $texts = [
   'This is the first of three sentences and the first contains argue! This is the second sentence. This is a third sentence.',
@@ -36,10 +37,16 @@ $texts = [
 
 $tokens = ['argue'];
 
+foreach ($texts as $key => $text) {
+  echo '<div>';
+  echo $key + 1 . ': ' . $text;
+  echo '</div>';
+}
+
 echo '<h2>Kwic output for "argue"</h2>';
 foreach ($texts as $key => $text) {
   echo '<div class="kwic">';
-  echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 350, $type = 'kwic');
+  echo $key + 1 . ': ' . Highlighter::process($text, $tokens, $length = 350, $type = 'kwic');
   echo '</div>';
 }
 $tokens = ['argue', 'second', 'seconds'];
@@ -48,6 +55,6 @@ $tokens = ['argue', 'second', 'seconds'];
 echo '<h2>Kwic output for "argue + second + seconds"</h2>';
 foreach ($texts as $key => $text) {
   echo '<div class="kwic">';
-  echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 350, $type = 'kwic');
+  echo $key + 1 . ': ' . Highlighter::process($text, $tokens, $length = 350, $type = 'kwic');
   echo '</div>';
 }

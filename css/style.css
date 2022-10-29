@@ -1,0 +1,18 @@
+  .kwic {
+    width: 100%;
+    font-family: monospace;
+  }
+
+  .kwic span {
+    display: inline-block;
+  }
+
+  .before {
+    text-align: right;
+    width: 40%
+  }
+
+  .after {
+    text-align: left;
+    width: 40%;
+  }

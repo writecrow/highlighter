@@ -7,7 +7,7 @@
 
 require './vendor/autoload.php';
 
-use writecrow\Highlighter\HighlightExcerpt;
+use writecrow\Highlighter\Highlighter;
 
 $text = 'While settling this point, she was suddenly roused by the sound of the door-bell, and her spirits were a little fluttered by the idea of its being Colonel Fitzwilliam himself, who had once before called late in the evening, and might now come to inquire particularly after her. But this idea was soon banished, and her spirits were very differently affected, when, to her utter amazement, she saw Mr. Darcy walk into the room. In an hurried manner he immediately began an inquiry after her health, imputing his visit to a wish of hearing that she were better. She answered him with cold civility. He sat down for a few moments, and then getting up, walked about the room. Elizabeth was surprised, but said not a word. After a silence of several minutes, he came towards her in an agitated manner, and thus began: "In vain I have struggled."';
 $tokens = [];
@@ -31,25 +31,9 @@ echo '<!DOCTYPE html>
 <html>
 <head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
-<style>
-  .kwic {
-    width: 100%;
-  }
-  .kwic span {
-    display: inline-block;
-  }
-  .before {
-    text-align: right;
-    width: 40%
-  }
-  .target {
-    padding: 0 1ch;
-  }
-  .after {
-    text-align: left;
-    width: 40%;
-  }
-</style>
+<style>';
+  require 'css/style.css';
+echo '</style>
 </head>
 <body>';
 
@@ -75,16 +59,16 @@ echo '
         <select name="type">
           <option value="crowcordance">"Crowcordance"</option>
           <option value="kwic">Keyword in context</option>
-          <option value="default">Multiple matching excerpts</option>
+          <option value="all">All matching results</option>
         </select>
         <ul>
           <li>"Crowcordance" attempts to render full sentences on either side of the target word. If full sentences are not present, it will render what is available.</li>
           <li>"Keyword in Context" attempts to render 0 words on either side of the target word.</li>
-          <li>"Multiple matching excerpts" attempts to highlight multiple target words, if provided, similar to a search engine result excerpt</li>
+          <li>"All matching results" highlights all target words, no excerpt</li>
         </ul>
         <input type="submit" value="Highlight" />';
 echo '<div><h4>Highlighted Excerpt</h4>';
-echo HighlightExcerpt::highlight($text, $tokens, $length = 350, $type);
+echo Highlighter::process($text, $tokens, $length = 350, $type);
 echo '</div>';
 echo '
       </div>

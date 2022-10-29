@@ -13,7 +13,7 @@
   }
 
   .target {
-    padding: 0 1ch;
+    padding-left: 1ch;
   }
 
   .after {
@@ -25,7 +25,7 @@
 
 require './../vendor/autoload.php';
 
-use writecrow\Highlighter\HighlightExcerpt;
+use writecrow\Highlighter\Highlighter;
 
 $texts = [
   'This is the first of three sentences and the first contains argue! This is the second sentence. This is a third sentence.',
@@ -61,7 +61,7 @@ $tokens = ['argue'];
 echo '<h3>KWIC output for "argue"</h3>';
 foreach ($texts as $key => $text) {
   echo '<div class="kwic">';
-  echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 100, $type = 'kwic');
+  echo $key + 1 . ': ' . Highlighter::process($text, $tokens, $length = 100, $type = 'kwic');
   echo '</div>';
 }
 
@@ -72,7 +72,7 @@ $tokens = ['argue', 'second'];
 echo '<h3>KWIC output for "argue + second"</h3>';
 foreach ($texts as $key => $text) {
   echo '<div class="kwic">';
-  echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 100, $type = 'kwic');
+  echo $key + 1 . ': ' . Highlighter::process($text, $tokens, $length = 100, $type = 'kwic');
   echo '</div>';
 }
 
@@ -100,7 +100,7 @@ $tokens = ['argue'];
 echo '<h3>Crowcordance output for "argue"</h3>';
 foreach ($texts as $key => $text) {
   echo '<div>';
-  echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 350, $type = 'crowcordance');
+  echo $key + 1 . ': ' . Highlighter::process($text, $tokens, $length = 350, $type = 'crowcordance');
   echo '</div>';
 }
 
@@ -110,7 +110,7 @@ $tokens = ['argue', 'second'];
 echo '<h3>Crowcordance output for "argue + second"</h3>';
 foreach ($texts as $key => $text) {
   echo '<div>';
-  echo $key + 1 . ': ' . HighlightExcerpt::highlight($text, $tokens, $length = 350, $type = 'crowcordance');
+  echo $key + 1 . ': ' . Highlighter::process($text, $tokens, $length = 350, $type = 'crowcordance');
   echo '</div>';
 }
 
