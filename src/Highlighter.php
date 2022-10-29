@@ -42,7 +42,7 @@ class Highlighter {
    *   The highlighted text.
    */
   public static function process($text, array $tokens, $length = '300', $type = 'concat') {
-    $match = [];
+    $matches = [];
     $excerpt = '';
     $highlighted = '';
     $text = self::cleanText($text);
@@ -71,18 +71,20 @@ class Highlighter {
     }
 
     switch ($type) {
-      case 'kwic':
-        $highlighted = self::getKwic($text, $tokens, $matches);
-        break;
 
       case 'crowcordance':
         $highlighted = self::getCrowcordance($text, $tokens);
         break;
 
       case 'all':
-      default:
+
         $excerpt = $text;
         $highlighted = self::highlight($excerpt, $matches);
+        break;
+
+      case 'kwic':
+      default:
+        $highlighted = self::getKwic($text, $tokens, $matches);
         break;
 
     }
@@ -154,6 +156,27 @@ class Highlighter {
       }
     }
   }
+
+  public static function getIddl($text, $tokens, $matches) {
+    print_r('here');
+    foreach ($matches as $match) {
+      if (!empty($match)) {
+        if ($match['pos'] < 50) {
+          $text = self::mbStrPad($text, 50 - $match['pos'] + mb_strlen($text), ' ', STR_PAD_LEFT);
+        }
+        $start = $match['pos'] < 50 ? 0 : $match['pos'] - 50;
+        $before = mb_substr($text, $start, 50);
+        $after = mb_substr($text, $start + 51 + mb_strlen($match['string']), 50);
+        if (mb_strlen($after) < 50) {
+          $after = self::mbStrPad($after, 50 - mb_strlen($after), ' ', STR_PAD_RIGHT);
+        }
+        $chunks = [$before, '<mark>', $match['string'], '</mark>', $after];
+        $highlighted = implode("", $chunks);
+        return $highlighted;
+      }
+    }
+  }
+
 
   public static function getCrowcordance($text, $tokens) {
     $output = [
