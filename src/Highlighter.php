@@ -350,6 +350,9 @@ class Highlighter {
   }
 
   public static function finalize($highlighted) {
+    if (empty($highlighted)) {
+      return $highlighted;
+    }
     // Ensure problematic characters are encoded (particularly for JSON).
     $str = htmlentities($highlighted, ENT_NOQUOTES, 'UTF-8', FALSE);
     $str = str_replace(['&lt;', '&gt;'], ['<', '>'], $str);
