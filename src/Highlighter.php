@@ -76,6 +76,10 @@ class Highlighter {
         $highlighted = self::getCrowcordance($text, $tokens);
         break;
 
+      case 'sentence':
+        $highlighted = self::getSentence($text, $tokens);
+        break;
+
       case 'all':
 
         $excerpt = $text;
@@ -175,6 +179,40 @@ class Highlighter {
         return $highlighted;
       }
     }
+  }
+
+  public static function getSentence($text, $tokens) {
+    $output = ['target' => ''];
+    $text = mb_convert_encoding($text, 'UTF-8', mb_list_encodings());
+    $sentences = self::splitSentences($text);
+    $found = [];
+    for ($i = 0; $i < count($sentences); ++$i) {
+      $clean_sentence = preg_replace("/\pP+/", " ", $sentences[$i]);
+      foreach ($tokens as $token) {
+        $clean_token = preg_replace("/\pP+/", "", $token);
+        if (mb_strpos(mb_strtolower($clean_sentence), mb_strtolower($clean_token . ' ')) !== FALSE) {
+          $found[] = $i;
+        }
+      }
+    }
+    if (empty($found)) {
+      return 'Search term not found.';
+    }
+    // Handle scenario where the only the first sentence has a target.
+    if (count($found) === 1 && $found == [0]) {
+      $output['target'] = $sentences[0];
+    }
+    $first_match = reset($found);
+    // If the first of multiple matches is the first sentence, skip to the second;
+    if ($first_match === 0) {
+      array_shift($found);
+      $first_match = reset($found);
+    }
+    $output['target'] = $sentences[$first_match];
+    // Highlight any tokens in ONLY the target sentence.
+    $output['target'] = self::process($output['target'], $tokens, FALSE, 'all');
+    $prepared = trim($output['target']);
+    return preg_replace('/\s+/', ' ', $prepared);
   }
 
 
