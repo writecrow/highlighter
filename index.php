@@ -54,10 +54,11 @@ echo '
         <input name="token1" value=\'' . strip_tags($tokens[0]) . '\'>
         <br />
         <strong>Highlight style</strong>
-        <select name="type">
-          <option value="crowcordance">"Crowcordance"</option>
-          <option value="kwic" selected="selected">Keyword in context</option>
-          <option value="all">All matching results</option>
+        <select name="type">';
+echo '
+          <option value="crowcordance" '; if ($type=="crowcordance") { echo 'selected="selected"'; } echo '>Crowcordance</option>
+          <option value="kwic" '; if ($type=="kwic") { echo 'selected="selected"'; } echo '>Keyword in context</option>
+          <option value="all" '; if ($type=="all") { echo 'selected="selected"'; } echo '>All matching results</option>
         </select>
         <input type="submit" value="Highlight" />';
 echo '<div><h4>Highlighted Excerpt</h4>';

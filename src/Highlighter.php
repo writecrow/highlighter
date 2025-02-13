@@ -164,7 +164,6 @@ class Highlighter {
   }
 
   public static function getIddl($text, $tokens, $matches) {
-    print_r('here');
     foreach ($matches as $match) {
       if (!empty($match)) {
         if ($match['pos'] < 50) {
@@ -303,7 +302,8 @@ class Highlighter {
     $first = mb_substr($token, 0, 1);
     $last = mb_substr($token, -1);
     if ($first == '"' && $last == '"') {
-      $token = trim($token, '"');
+      $length = mb_strlen($token);
+      $token = substr($token, 1, $length - 2);
       $quoted = TRUE;
     }
     preg_match('/[\s\p{P}]/u', mb_substr($token, 0, 1), $non_alpha);
