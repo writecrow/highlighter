@@ -52,20 +52,13 @@ echo '
       <div class="twelve columns">
         <label for="token1">Word/phrase to be highlighted</label>
         <input name="token1" value=\'' . strip_tags($tokens[0]) . '\'>
-        <input name="token2" value=\'' . strip_tags($tokens[1]) . '\'>
-        <input name="token3" value=\'' . strip_tags($tokens[2]) . '\'>
         <br />
         <strong>Highlight style</strong>
         <select name="type">
           <option value="crowcordance">"Crowcordance"</option>
-          <option value="kwic">Keyword in context</option>
+          <option value="kwic" selected="selected">Keyword in context</option>
           <option value="all">All matching results</option>
         </select>
-        <ul>
-          <li>"Crowcordance" attempts to render full sentences on either side of the target word. If full sentences are not present, it will render what is available.</li>
-          <li>"Keyword in Context" attempts to render 0 words on either side of the target word.</li>
-          <li>"All matching results" highlights all target words, no excerpt</li>
-        </ul>
         <input type="submit" value="Highlight" />';
 echo '<div><h4>Highlighted Excerpt</h4>';
 echo Highlighter::process($text, $tokens, $length = 350, $type);

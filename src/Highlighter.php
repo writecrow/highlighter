@@ -142,12 +142,14 @@ class Highlighter {
     foreach ($matches as $match) {
       if (!empty($match)) {
         if ($match['pos'] < 50) {
+          // The excerpt is near the beginning of the text.
           $text = self::mbStrPad($text, 50 - $match['pos'] + mb_strlen($text), ' ', STR_PAD_LEFT);
         }
         $start = $match['pos'] < 50 ? 0 : $match['pos'] - 50;
-        $before = mb_substr($text, $start, 50);
+        $before = mb_substr($text, $start, 51);
         $after = mb_substr($text, $start + 51 + mb_strlen($match['string']), 50);
         if (mb_strlen($after) < 50) {
+          // The match is near the end of the text.
           $after = self::mbStrPad($after, 50 - mb_strlen($after), ' ', STR_PAD_RIGHT);
         }
         $chunks = [];
